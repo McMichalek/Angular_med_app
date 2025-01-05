@@ -43,6 +43,7 @@ export class CalendarViewComponent implements OnInit {
   loadAppointments(): void {
     this.calendarService.getAppointments().subscribe((data) => {
       this.appointmentsData = data;
+      this.calendarService.appointmentsData = data;
     });
   }
 
@@ -155,6 +156,10 @@ export class CalendarViewComponent implements OnInit {
 
   isSlotAvailable(day: moment.Moment, slot: moment.Moment): boolean {
     return this.calendarService.isSlotInAvailability(day, slot);
+  }
+
+  isAbsenceDay(day: moment.Moment): boolean {
+    return this.calendarService.isDayAbsence(day);
   }
 
 }

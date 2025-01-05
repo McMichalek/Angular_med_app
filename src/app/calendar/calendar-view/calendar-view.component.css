@@ -30,3 +30,8 @@ color: #aaa;
   border-radius: 3px;
   font-style: italic;
 }
+
+.absent {
+  background-color: #f8d7da; /* jasny czerwony/rozowy */
+  color: #721c24; /* ciemnoczerwony tekst */
+}

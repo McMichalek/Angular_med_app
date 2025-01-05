@@ -27,12 +27,31 @@ export class CalendarService {
 
   constructor(private http: HttpClient) {}
 
+  private absences: Absence[] = [];
+
+  private availabilities: Availability[] = [];
+
+  public appointmentsData: DayAppointments[] = [];
+
+  addAbsence(abs: Absence): void {
+    // Generowanie id:
+    abs.id = this.absences.length > 0
+      ? Math.max(...this.absences.map(a => a.id)) + 1
+      : 1;
+    this.absences.push(abs);
+
+    // Sprawdzamy konflikt:
+    this.cancelAppointmentsForAbsence(abs.date);
+  }
+
+  getAbsences(): Absence[] {
+    return this.absences;
+  }
+
   public getAppointments(): Observable<DayAppointments[]> {
     // Uwaga: plik JSON w folderze "src/assets/appointments.json"
     return this.http.get<DayAppointments[]>('assets/appointments.json');
   }
-
-  private availabilities: Availability[] = [];
 
   // Dodanie nowej dostępności
   addAvailability(av: Availability): void {
@@ -100,6 +119,25 @@ export class CalendarService {
     return false;
   }
 
+  private cancelAppointmentsForAbsence(absenceDate: string): void {
+    const dayData = this.appointmentsData.find(d =>
+      moment(d.date).isSame(absenceDate, 'day')
+    );
+    if (dayData) {
+      // Zmieniamy status na CANCELLED
+      dayData.appointments.forEach(appt => {
+        if (appt.status === 'CONFIRMED') {
+          appt.status = 'CANCELLED';
+        }
+      });
+    }
+  }
+
+  isDayAbsence(date: moment.Moment): boolean {
+    // Jeżeli w this.absences jest obiekt z date == date
+    return this.absences.some(a => moment(a.date).isSame(date, 'day'));
+  }
+
 }
 
 export interface Availability {
@@ -112,4 +150,10 @@ export interface Availability {
   daysOfWeek?: number[];
   // pory konsultacji w ciągu dnia (np. [ { from: '08:00', to: '12:30' }, { from: '16:00', to: '21:30' } ])
   timeRanges: { from: string; to: string }[];
+}
+
+export interface Absence {
+  id: number;
+  date: string; // np. '2025-01-15', całodniowa nieobecność
+  reason?: string; // opis, np. "wakacje", "szkolenie" itp.
 }

@@ -1,0 +1,17 @@
+<div class="absence-form">
+  <h2>Dodawanie absencji (nieobecności)</h2>
+
+  <form [formGroup]="absenceForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label>Data nieobecności (całodniowa):</label>
+      <input type="date" formControlName="date" />
+    </div>
+
+    <div>
+      <label>Powód (opcjonalnie):</label>
+      <input type="text" formControlName="reason" />
+    </div>
+
+    <button type="submit" [disabled]="absenceForm.invalid">Zapisz absencję</button>
+  </form>
+</div>
