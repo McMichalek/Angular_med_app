@@ -1,13 +1,13 @@
-<!-- src/app/calendar/calendar-view/calendar-view.component.html -->
 <div class="calendar-container">
   <div class="calendar-header">
+    <!-- Nawigacja tygodniowa: poprzedni tydzień, obecny, następny -->
     <button (click)="prevWeek()">« Poprzedni tydzień</button>
-    <span class="week-label">
-      {{ currentWeekStart.format('DD.MM.YYYY') }}
-      -
-      {{ currentWeekStart.clone().add(6, 'days').format('DD.MM.YYYY') }}
-    </span>
+    <button (click)="goToCurrentWeek()">Obecny tydzień</button>
     <button (click)="nextWeek()">Następny tydzień »</button>
+
+    <!-- Nowe przyciski: przewijanie godzin w górę / w dół -->
+    <button (click)="scrollUp()">Godziny ↑</button>
+    <button (click)="scrollDown()">Godziny ↓</button>
   </div>
 
   <table class="calendar-table">
@@ -20,9 +20,6 @@
         <div>{{ day.format('dddd') }}, {{ day.format('DD.MM') }}</div>
         <div class="appointments-count">
           <!-- Liczba rezerwacji zarejestrowanych na dany dzień -->
-<!--          Rezerwacje: {{-->
-<!--            appointmentsData.find(d => day.isSame(d.date, 'day'))?.appointments.length || 0-->
-<!--          }}-->
           Rezerwacje: {{ getAppointmentsCountForDay(day) }}
         </div>
       </th>
@@ -37,22 +34,37 @@
       <!-- Kolumny dla 7 dni w tygodniu -->
       <td *ngFor="let day of displayedDays"
           [class.today]="isToday(day)"
-          [class.current-time]="isCurrentTimeSlot(slot, day)">
+          [class.current-time]="isCurrentTimeSlot(slot, day)"
+          [class.unavailable]="!isSlotAvailable(day, slot)">
 
-        <!-- Szukamy wizyt pasujących do tego slotu i dnia -->
-        <ng-container *ngFor="let appt of getAppointmentsForSlot(day, slot)">
-          <div class="appointment-block"
-               [class.past]="isPastAppointment(appt)"
-               [title]="
-                    'Typ: ' + appt.type + '\n' +
-                    'Pacjent: ' + appt.patientName + '\n' +
-                    'Godziny: ' +
-                      (appt.startTime | date:'HH:mm') + ' - ' +
-                      (appt.endTime   | date:'HH:mm')
-                  ">
-            {{ appt.type }} ({{ appt.patientName }})
+        <!-- Sprawdzamy, czy slot jest dostępny (wg zdefiniowanych dostępności).
+             Jeśli nie, wyświetlamy 'Niedostępne'. -->
+        <ng-container *ngIf="isSlotAvailable(day, slot); else unavailableSlot">
+          <!-- Pokazujemy rezerwacje (może być 0 lub wiele) -->
+          <ng-container *ngFor="let appt of getAppointmentsForSlot(day, slot)">
+            <div class="appointment-block"
+                 [class.past]="isPastAppointment(appt)"
+                 [title]="
+                     'Typ: ' + appt.type + '\n' +
+                     'Pacjent: ' + appt.patientName + '\n' +
+                     'Godz.: ' +
+                       (appt.startTime | date:'HH:mm') + ' - ' +
+                       (appt.endTime   | date:'HH:mm')
+                   ">
+              {{ appt.type }} ({{ appt.patientName }})
+            </div>
+          </ng-container>
+
+          <!-- Jeśli brak rezerwacji, a slot jest dostępny, pokaż 'Wolny' -->
+          <div *ngIf="getAppointmentsForSlot(day, slot).length === 0" class="slot-free">
+            Wolny
           </div>
         </ng-container>
+
+        <!-- Gdy slot niedostępny (nieobjęty żadną dostępnością lekarza) -->
+        <ng-template #unavailableSlot>
+          <div class="slot-unavailable">Niedostępne</div>
+        </ng-template>
       </td>
     </tr>
     </tbody>

@@ -14,15 +14,19 @@ import { CalendarService, DayAppointments, Appointment } from '../calendar.servi
 })
 export class CalendarViewComponent implements OnInit {
   // Tydzień, który aktualnie wyświetlamy
-  currentWeekStart: moment.Moment = moment().startOf('week'); // start tygodnia (poniedziałek)
+  currentWeekStart: moment.Moment = moment().startOf('isoWeek'); // start tygodnia (poniedziałek)
   displayedDays: moment.Moment[] = [];
 
   // Dane z JSON
   appointmentsData: DayAppointments[] = [];
 
   // Zakres godzin wyświetlanych w tabeli (domyślnie 6h, np. 8:00-14:00)
-  startHour = 8;
-  endHour = 14;
+  displayStartHour = 8;
+  displayEndHour = 14;
+
+  readonly MIN_HOUR = 0;
+  readonly MAX_HOUR = 24;
+  readonly DISPLAY_RANGE = 6;
 
   // Tablica slotów co 30 minut (0.5h)
   timeSlots: moment.Moment[] = [];
@@ -54,12 +58,28 @@ export class CalendarViewComponent implements OnInit {
   // 3) Inicjalizacja slotów czasowych co 30 minut w zadanym zakresie (8:00 - 14:00)
   initTimeSlots(): void {
     this.timeSlots = [];
-    const start = moment().startOf('day').hour(this.startHour).minute(0);
-    const end = moment().startOf('day').hour(this.endHour).minute(0);
+    const start = moment().startOf('day').hour(this.displayStartHour).minute(0);
+    const end = moment().startOf('day').hour(this.displayEndHour).minute(0);
 
     while (start.isBefore(end)) {
       this.timeSlots.push(start.clone());
       start.add(30, 'minutes');
+    }
+  }
+
+  scrollUp(): void {
+    if (this.displayStartHour > this.MIN_HOUR) {
+      this.displayStartHour--;
+      this.displayEndHour--;
+      this.initTimeSlots();
+    }
+  }
+
+  scrollDown(): void {
+    if (this.displayEndHour < this.MAX_HOUR) {
+      this.displayStartHour++;
+      this.displayEndHour++;
+      this.initTimeSlots();
     }
   }
 
@@ -127,4 +147,14 @@ export class CalendarViewComponent implements OnInit {
     );
     return dayData?.appointments.length || 0;
   }
+
+  goToCurrentWeek(): void {
+    this.currentWeekStart = moment().startOf('week');
+    this.initDisplayedWeek();
+  }
+
+  isSlotAvailable(day: moment.Moment, slot: moment.Moment): boolean {
+    return this.calendarService.isSlotInAvailability(day, slot);
+  }
+
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {RouterLink, RouterOutlet} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {CalendarViewComponent} from './calendar/calendar-view/calendar-view.component';
 
@@ -9,7 +9,8 @@ import {CalendarViewComponent} from './calendar/calendar-view/calendar-view.comp
   // imports: [RouterOutlet],
   imports: [
     CommonModule,
-    CalendarViewComponent
+    RouterOutlet,
+    RouterLink
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

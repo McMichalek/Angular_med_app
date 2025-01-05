@@ -1,0 +1,60 @@
+<div class="availability-form">
+  <h2>Definiowanie dostępności</h2>
+
+  <form [formGroup]="availabilityForm" (ngSubmit)="onSubmit()">
+
+    <!-- Rodzaj dostępności -->
+    <label>
+      <input type="radio" formControlName="type" value="CYCLIC" />
+      Dostępność cykliczna
+    </label>
+    <label>
+      <input type="radio" formControlName="type" value="ONE_TIME" />
+      Dostępność jednorazowa
+    </label>
+
+    <!-- Daty -->
+    <div>
+      <label>Start date:
+        <input type="date" formControlName="startDate" />
+      </label>
+    </div>
+    <div *ngIf="availabilityForm.value.type === 'CYCLIC'">
+      <label>End date:
+        <input type="date" formControlName="endDate" />
+      </label>
+    </div>
+
+    <!-- Maska dni (tylko dla cyklicznej) -->
+    <div *ngIf="availabilityForm.value.type === 'CYCLIC'">
+      <p>Wybierz dni tygodnia:</p>
+      <div *ngFor="let opt of daysOfWeekOptions">
+        <<input
+        type="checkbox"
+        [value]="opt.value"
+        (change)="onDayOfWeekChange(opt.value, $any($event.target).checked)"
+      />
+        {{ opt.label }}
+      </div>
+    </div>
+
+    <!-- Przedziały godzin -->
+    <p>Zakres godzin konsultacji (w formacie HH:MM):</p>
+    <div formArrayName="timeRanges">
+      <div *ngFor="let group of timeRanges.controls; let i=index" [formGroupName]="i">
+        <label>From:
+          <input type="time" formControlName="from" />
+        </label>
+        <label>To:
+          <input type="time" formControlName="to" />
+        </label>
+        <button type="button" (click)="removeTimeRange(i)">Usuń przedział</button>
+      </div>
+    </div>
+    <button type="button" (click)="addTimeRange()">Dodaj kolejny przedział</button>
+
+    <div>
+      <button type="submit" [disabled]="availabilityForm.invalid">Zapisz dostępność</button>
+    </div>
+  </form>
+</div>
