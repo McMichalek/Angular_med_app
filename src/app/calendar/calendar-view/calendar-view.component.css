@@ -1,0 +1,69 @@
+/* src/app/calendar/calendar-view/calendar-view.component.css */
+
+.calendar-container {
+  margin: 1rem;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  .week-label {
+    font-weight: bold;
+  }
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    vertical-align: top;
+  }
+
+  th {
+    background-color: #eee;
+  }
+
+  /* kolumna z godzinami */
+  .time-label {
+    width: 60px;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .appointments-count {
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+    color: #666;
+  }
+}
+
+/* Wyróżnienie dnia dzisiejszego */
+.today {
+  background-color: #fff3bf; /* Jasnożółty */
+}
+
+/* Wyróżnienie bieżącego slotu (symulacja "aktualnej godziny") */
+.current-time {
+  border: 2px solid red;
+}
+
+/* Blok wizyty */
+.appointment-block {
+  background-color: #cce5ff; /* Jasny niebieski */
+  margin: 3px 0;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &.past {
+    background-color: #ccc;
+    color: #666;
+  }
+}

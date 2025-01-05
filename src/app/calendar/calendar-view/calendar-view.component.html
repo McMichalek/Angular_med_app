@@ -1,0 +1,60 @@
+<!-- src/app/calendar/calendar-view/calendar-view.component.html -->
+<div class="calendar-container">
+  <div class="calendar-header">
+    <button (click)="prevWeek()">« Poprzedni tydzień</button>
+    <span class="week-label">
+      {{ currentWeekStart.format('DD.MM.YYYY') }}
+      -
+      {{ currentWeekStart.clone().add(6, 'days').format('DD.MM.YYYY') }}
+    </span>
+    <button (click)="nextWeek()">Następny tydzień »</button>
+  </div>
+
+  <table class="calendar-table">
+    <thead>
+    <tr>
+      <!-- Pusta komórka w nagłówku dla kolumny godzin -->
+      <th></th>
+      <!-- Nagłówki kolumn - 7 dni tygodnia -->
+      <th *ngFor="let day of displayedDays" [class.today]="isToday(day)">
+        <div>{{ day.format('dddd') }}, {{ day.format('DD.MM') }}</div>
+        <div class="appointments-count">
+          <!-- Liczba rezerwacji zarejestrowanych na dany dzień -->
+<!--          Rezerwacje: {{-->
+<!--            appointmentsData.find(d => day.isSame(d.date, 'day'))?.appointments.length || 0-->
+<!--          }}-->
+          Rezerwacje: {{ getAppointmentsCountForDay(day) }}
+        </div>
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Wiersze: sloty co 30 min -->
+    <tr *ngFor="let slot of timeSlots">
+      <!-- Komórka z godziną (nagłówek wiersza) -->
+      <th class="time-label">{{ formatHour(slot) }}</th>
+
+      <!-- Kolumny dla 7 dni w tygodniu -->
+      <td *ngFor="let day of displayedDays"
+          [class.today]="isToday(day)"
+          [class.current-time]="isCurrentTimeSlot(slot, day)">
+
+        <!-- Szukamy wizyt pasujących do tego slotu i dnia -->
+        <ng-container *ngFor="let appt of getAppointmentsForSlot(day, slot)">
+          <div class="appointment-block"
+               [class.past]="isPastAppointment(appt)"
+               [title]="
+                    'Typ: ' + appt.type + '\n' +
+                    'Pacjent: ' + appt.patientName + '\n' +
+                    'Godziny: ' +
+                      (appt.startTime | date:'HH:mm') + ' - ' +
+                      (appt.endTime   | date:'HH:mm')
+                  ">
+            {{ appt.type }} ({{ appt.patientName }})
+          </div>
+        </ng-container>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>

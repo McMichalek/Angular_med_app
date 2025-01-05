@@ -1,0 +1,36 @@
+[
+  {
+    "date": "2025-01-05",
+    "appointments": [
+      {
+        "id": 1,
+        "startTime": "2025-01-05T08:00:00",
+        "endTime": "2025-01-05T08:30:00",
+        "type": "pierwsza wizyta",
+        "patientName": "Jan Kowalski",
+        "status": "CONFIRMED"
+      },
+      {
+        "id": 2,
+        "startTime": "2025-01-05T10:00:00",
+        "endTime": "2025-01-05T10:30:00",
+        "type": "wizyta kontrolna",
+        "patientName": "Anna Nowak",
+        "status": "CONFIRMED"
+      }
+    ]
+  },
+  {
+    "date": "2025-01-06",
+    "appointments": [
+      {
+        "id": 3,
+        "startTime": "2025-01-06T12:00:00",
+        "endTime": "2025-01-06T12:30:00",
+        "type": "choroba przewlekła",
+        "patientName": "Krzysztof Iksiński",
+        "status": "CONFIRMED"
+      }
+    ]
+  }
+]
