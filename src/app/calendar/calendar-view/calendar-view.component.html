@@ -18,7 +18,7 @@
       <!-- Nagłówki kolumn - 7 dni tygodnia -->
       <th *ngFor="let day of displayedDays"
           [class.today]="isToday(day)"
-          [class.absent]="isAbsenceDay(day)">
+          [class.absent]="isDayInAbsence(day)">
         <div>{{ day.format('dddd') }}, {{ day.format('DD.MM') }}</div>
         <div class="appointments-count">
           <!-- Liczba rezerwacji zarejestrowanych na dany dzień -->
@@ -37,10 +37,10 @@
       <td *ngFor="let day of displayedDays"
           [class.today]="isToday(day)"
           [class.current-time]="isCurrentTimeSlot(slot, day)"
-          [class.unavailable]="!isSlotAvailable(day, slot) || isAbsenceDay(day)"
-          [class.absent]="isAbsenceDay(day)"
+          [class.unavailable]="!isSlotAvailable(day, slot) || isDayInAbsence(day)"
+          [class.absent]="isDayInAbsence(day)"
       >
-        <ng-container *ngIf="!isAbsenceDay(day); else absentDay">
+        <ng-container *ngIf="isSlotAvailable(day, slot); else unavailableSlot">
           <!-- Pokazujemy rezerwacje (może być 0 lub wiele) -->
           <ng-container *ngFor="let appt of getAppointmentsForSlot(day, slot)">
             <div class="appointment-block"
@@ -63,8 +63,8 @@
         </ng-container>
 
         <!-- Gdy slot niedostępny (nieobjęty żadną dostępnością lekarza) -->
-        <ng-template #absentDay>
-          <div class="slot-unavailable">Nieobecność</div>
+        <ng-template #unavailableSlot>
+          <div class="slot-unavailable">Niedostępne</div>
         </ng-template>
       </td>
     </tr>

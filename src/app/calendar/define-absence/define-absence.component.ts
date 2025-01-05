@@ -14,31 +14,34 @@ import moment from 'moment';
   styleUrl: './define-absence.component.css'
 })
 export class DefineAbsenceComponent {
-  absenceForm: FormGroup;
+  absenceForm = new FormGroup({
+    startDate: new FormControl('', Validators.required),
+    endDate: new FormControl('', Validators.required),
+    reason: new FormControl(''),
+  });
 
-  constructor(private calendarService: CalendarService) {
-    this.absenceForm = new FormGroup({
-      date: new FormControl('', Validators.required),
-      reason: new FormControl(''),
-    });
-  }
+  constructor(private calendarService: CalendarService) {}
 
-  onSubmit(): void {
+  onSubmit() {
     if (this.absenceForm.invalid) {
       return;
     }
+    const { startDate, endDate, reason } = this.absenceForm.value;
 
-    const rawValue = this.absenceForm.value;
+    // Upewnij się, że startDate <= endDate w warstwie logiki:
+    if (moment(startDate).isAfter(moment(endDate))) {
+      alert('Data początkowa nie może być późniejsza niż końcowa!');
+      return;
+    }
+
     const newAbs = {
       id: 0,
-      date: rawValue.date,   // YYYY-MM-DD
-      reason: rawValue.reason,
+      startDate: startDate as string,
+      endDate: endDate as string,
+      reason: endDate as string
     };
-
-    // Dodajemy do serwisu, co anuluje konfliktujące wizyty
     this.calendarService.addAbsence(newAbs);
 
-    // Reset
     this.absenceForm.reset();
   }
 }

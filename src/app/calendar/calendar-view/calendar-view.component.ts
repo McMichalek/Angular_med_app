@@ -154,12 +154,12 @@ export class CalendarViewComponent implements OnInit {
     this.initDisplayedWeek();
   }
 
-  isSlotAvailable(day: moment.Moment, slot: moment.Moment): boolean {
-    return this.calendarService.isSlotInAvailability(day, slot);
+  isDayInAbsence(day: moment.Moment): boolean {
+    return this.calendarService.isDayInAbsence(day);
   }
 
-  isAbsenceDay(day: moment.Moment): boolean {
-    return this.calendarService.isDayAbsence(day);
+  isSlotAvailable(day: moment.Moment, slot: moment.Moment): boolean {
+    return this.calendarService.isSlotInAvailability(day, slot);
   }
 
 }

@@ -34,14 +34,13 @@ export class CalendarService {
   public appointmentsData: DayAppointments[] = [];
 
   addAbsence(abs: Absence): void {
-    // Generowanie id:
     abs.id = this.absences.length > 0
       ? Math.max(...this.absences.map(a => a.id)) + 1
       : 1;
     this.absences.push(abs);
 
-    // Sprawdzamy konflikt:
-    this.cancelAppointmentsForAbsence(abs.date);
+    // Anulujemy konsultacje w tym przedziale
+    this.cancelAppointmentsInRange(abs.startDate, abs.endDate);
   }
 
   getAbsences(): Absence[] {
@@ -69,13 +68,11 @@ export class CalendarService {
 
   isSlotInAvailability(day: moment.Moment, slot: moment.Moment): boolean {
     // Przechodzimy po wszystkich availability:
-    for (const av of this.availabilities) {
-      // 1) Sprawdzamy, czy day jest w przedziale [startDate, endDate]
-      const startDate = moment(av.startDate, 'YYYY-MM-DD');
-      const endDate = av.endDate
-        ? moment(av.endDate, 'YYYY-MM-DD')
-        : startDate; // jeżeli brak endDate, przyjmujemy = startDate (ONE_TIME)
+    let available = false;
 
+    for (const av of this.availabilities) {
+      const startDate = moment(av.startDate, 'YYYY-MM-DD');
+      const endDate = moment(av.endDate ?? av.startDate, 'YYYY-MM-DD'); // jeśli endDate brak, to single day
       if (day.isBetween(startDate, endDate, 'day', '[]')) {
         // 2) Sprawdzamy, czy pasuje maska dni (dla CYCLIC)
         if (av.type === 'CYCLIC' && av.daysOfWeek) {
@@ -116,26 +113,34 @@ export class CalendarService {
     }
 
     // Żadna dostępność nie objęła tego slotu
-    return false;
+    return available;
   }
 
-  private cancelAppointmentsForAbsence(absenceDate: string): void {
-    const dayData = this.appointmentsData.find(d =>
-      moment(d.date).isSame(absenceDate, 'day')
-    );
-    if (dayData) {
-      // Zmieniamy status na CANCELLED
-      dayData.appointments.forEach(appt => {
-        if (appt.status === 'CONFIRMED') {
-          appt.status = 'CANCELLED';
-        }
-      });
+  private cancelAppointmentsInRange(startDateStr: string, endDateStr: string): void {
+    const start = moment(startDateStr, 'YYYY-MM-DD');
+    const end = moment(endDateStr, 'YYYY-MM-DD');
+
+    // Wyszukujemy wszystkie DayAppointments, których data mieści się w [start, end]
+    for (const dayData of this.appointmentsData) {
+      const day = moment(dayData.date, 'YYYY-MM-DD');
+      if (day.isBetween(start, end, 'day', '[]')) {
+        // Zmieniamy status wszelkich CONFIRMED na CANCELLED
+        dayData.appointments.forEach(appt => {
+          if (appt.status === 'CONFIRMED') {
+            appt.status = 'CANCELLED';
+          }
+        });
+      }
     }
   }
 
-  isDayAbsence(date: moment.Moment): boolean {
-    // Jeżeli w this.absences jest obiekt z date == date
-    return this.absences.some(a => moment(a.date).isSame(date, 'day'));
+  public isDayInAbsence(day: moment.Moment): boolean {
+    // Jeżeli day zawiera się w jakimkolwiek Absence: [startDate, endDate]
+    return this.absences.some(abs => {
+      const start = moment(abs.startDate, 'YYYY-MM-DD');
+      const end = moment(abs.endDate, 'YYYY-MM-DD');
+      return day.isBetween(start, end, 'day', '[]');
+    });
   }
 
 }
@@ -154,6 +159,7 @@ export interface Availability {
 
 export interface Absence {
   id: number;
-  date: string; // np. '2025-01-15', całodniowa nieobecność
-  reason?: string; // opis, np. "wakacje", "szkolenie" itp.
+  startDate: string; // YYYY-MM-DD
+  endDate: string;   // YYYY-MM-DD
+  reason?: string;
 }
