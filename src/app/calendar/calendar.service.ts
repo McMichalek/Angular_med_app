@@ -143,6 +143,73 @@ export class CalendarService {
     });
   }
 
+  checkConflict(day: moment.Moment, start: moment.Moment, end: moment.Moment): boolean {
+    // 1) Sprawdzamy, czy day jest w absencji
+    if (this.isDayInAbsence(day)) {
+      return true; // bo wtedy dzień jest zablokowany
+    }
+
+    // 2) Czy slot leży w dostępności w ogóle
+    // (jeśli w Zadaniu 2 zrobiliśmy isSlotInAvailability, to musimy sprawdzić
+    //  wszystkie sloty 30-minutowe w przedziale [start,end).
+    //  Na uproszczenie tu: sprawdźmy start co 30 min)
+    // ...
+    // Jeżeli stwierdzimy, że cokolwiek nie pasuje, zwracamy true (konflikt).
+
+    // 3) Sprawdzamy dotychczasowe rezerwacje
+    // Znajdź w appointmentsData dzień = day
+    const dayData = this.appointmentsData.find(d =>
+      moment(d.date).isSame(day, 'day')
+    );
+    if (!dayData) {
+      return false; // brak rezerwacji w tym dniu
+    }
+    // Sprawdź, czy któryś appointment koliduje
+    for (const appt of dayData.appointments) {
+      const apptStart = moment(appt.startTime);
+      const apptEnd = moment(appt.endTime);
+
+      // Warunek kolizji = [start, end) nakłada się na [apptStart, apptEnd)
+      // Najprostsza check:
+      const overlap = start.isBefore(apptEnd) && end.isAfter(apptStart);
+      if (overlap && appt.status !== 'CANCELLED') {
+        return true;
+      }
+    }
+
+    return false; // brak konfliktu
+  }
+
+  addAppointment(day: moment.Moment, newAppt: Appointment): void {
+    // 1) Generuj ID
+    // np. w prosty sposób:
+    newAppt.id = this.generateNewId();
+
+    // 2) Znajdź (albo stwórz) dayData
+    let dayData = this.appointmentsData.find(d =>
+      moment(d.date).isSame(day, 'day')
+    );
+    if (!dayData) {
+      dayData = { date: day.format('YYYY-MM-DD'), appointments: [] };
+      this.appointmentsData.push(dayData);
+    }
+
+    // 3) Dodaj appointment
+    dayData.appointments.push(newAppt);
+  }
+
+  private generateNewId(): number {
+    let maxId = 0;
+    for (const d of this.appointmentsData) {
+      for (const a of d.appointments) {
+        if (a.id > maxId) {
+          maxId = a.id;
+        }
+      }
+    }
+    return maxId + 1;
+  }
+
 }
 
 export interface Availability {

@@ -3,6 +3,7 @@ import { AppComponent } from './app.component';
 import {CalendarViewComponent} from './calendar/calendar-view/calendar-view.component';
 import {DefineAvailabilityComponent} from './calendar/define-availability/define-availability.component';
 import {DefineAbsenceComponent} from './calendar/define-absence/define-absence.component';
+import {ReserveConsultationComponent} from './calendar/reserve-consultation/reserve-consultation.component';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,8 @@ export const routes: Routes = [
     path: 'define-absence',
     component: DefineAbsenceComponent
   },
+  { path: 'reserve-consultation',
+    component: ReserveConsultationComponent },
   {
     path: '**',
     redirectTo: ''

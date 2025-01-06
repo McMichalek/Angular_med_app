@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import moment from 'moment';
 
 import { CalendarService, DayAppointments, Appointment } from '../calendar.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-calendar-view',
@@ -31,7 +32,8 @@ export class CalendarViewComponent implements OnInit {
   // Tablica slotów co 30 minut (0.5h)
   timeSlots: moment.Moment[] = [];
 
-  constructor(private calendarService: CalendarService) {}
+  constructor(private calendarService: CalendarService,
+              private router: Router) {}
 
   ngOnInit(): void {
     this.loadAppointments();
@@ -161,5 +163,15 @@ export class CalendarViewComponent implements OnInit {
   isSlotAvailable(day: moment.Moment, slot: moment.Moment): boolean {
     return this.calendarService.isSlotInAvailability(day, slot);
   }
+
+  reserveSlot(day: moment.Moment, slot: moment.Moment) {
+    const dateStr = day.format('YYYY-MM-DD');
+    const timeStr = slot.format('HH:mm');
+    // nawigacja do /reserve?day=2025-01-05&time=08:00
+    this.router.navigate(['/reserve-consultation'], {
+      queryParams: { day: dateStr, time: timeStr }
+    });
+  }
+
 
 }

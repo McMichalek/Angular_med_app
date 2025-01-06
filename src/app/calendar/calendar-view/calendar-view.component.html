@@ -34,36 +34,19 @@
       <th class="time-label">{{ formatHour(slot) }}</th>
 
       <!-- Kolumny dla 7 dni w tygodniu -->
-      <td *ngFor="let day of displayedDays"
-          [class.today]="isToday(day)"
-          [class.current-time]="isCurrentTimeSlot(slot, day)"
-          [class.unavailable]="!isSlotAvailable(day, slot) || isDayInAbsence(day)"
-          [class.absent]="isDayInAbsence(day)"
-      >
-        <ng-container *ngIf="isSlotAvailable(day, slot); else unavailableSlot">
-          <!-- Pokazujemy rezerwacje (może być 0 lub wiele) -->
+      <td *ngFor="let day of displayedDays">
+        <ng-container *ngIf="isSlotAvailable(day, slot); else notAvailable">
+          <!-- Rezerwacje -->
           <ng-container *ngFor="let appt of getAppointmentsForSlot(day, slot)">
-            <div class="appointment-block"
-                 [class.past]="isPastAppointment(appt)"
-                 [title]="
-                     'Typ: ' + appt.type + '\n' +
-                     'Pacjent: ' + appt.patientName + '\n' +
-                     'Godz.: ' +
-                       (appt.startTime | date:'HH:mm') + ' - ' +
-                       (appt.endTime   | date:'HH:mm')
-                   ">
-              {{ appt.type }} ({{ appt.patientName }})
-            </div>
+            <div class="appointment-block"> {{ appt.type }} </div>
           </ng-container>
-
-          <!-- Jeśli brak rezerwacji, a slot jest dostępny, pokaż 'Wolny' -->
-          <div *ngIf="getAppointmentsForSlot(day, slot).length === 0" class="slot-free">
+          <!-- Jeśli brak rezerwacji => Wolny slot -->
+          <div *ngIf="getAppointmentsForSlot(day, slot).length === 0" class="slot-free"
+               (click)="reserveSlot(day, slot)">
             Wolny
           </div>
         </ng-container>
-
-        <!-- Gdy slot niedostępny (nieobjęty żadną dostępnością lekarza) -->
-        <ng-template #unavailableSlot>
+        <ng-template #notAvailable>
           <div class="slot-unavailable">Niedostępne</div>
         </ng-template>
       </td>

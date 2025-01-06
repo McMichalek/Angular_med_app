@@ -1,0 +1,36 @@
+<div class="reserve-consultation">
+  <h2>Rezerwacja konsultacji</h2>
+
+  <form [formGroup]="reserveForm" (ngSubmit)="onSubmit()">
+    <label>Data wizyty:</label>
+    <input type="date" formControlName="day" />
+
+    <label>Godzina startu (HH:MM):</label>
+    <input type="time" formControlName="time" />
+
+    <label>Długość wizyty (liczba slotów 30min):</label>
+    <input type="number" formControlName="slotsCount" />
+
+    <label>Typ konsultacji:</label>
+    <select formControlName="type">
+      <option *ngFor="let t of consultationTypes" [value]="t">{{ t }}</option>
+    </select>
+
+    <label>Imię i nazwisko pacjenta:</label>
+    <input type="text" formControlName="patientName" />
+
+    <label>Płeć pacjenta:</label>
+    <select formControlName="patientGender">
+      <option value="M">Mężczyzna</option>
+      <option value="F">Kobieta</option>
+    </select>
+
+    <label>Wiek pacjenta:</label>
+    <input type="number" formControlName="patientAge" />
+
+    <label>Informacje dla lekarza (opcjonalne):</label>
+    <textarea formControlName="notes"></textarea>
+
+    <button type="submit" [disabled]="reserveForm.invalid">Zarezerwuj</button>
+  </form>
+</div>
