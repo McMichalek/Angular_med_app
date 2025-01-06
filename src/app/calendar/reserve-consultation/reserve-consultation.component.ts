@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {CalendarService, Appointment} from '../calendar.service';
+import {CartService} from '../../cart/cart.service';
 
 import moment from 'moment';
 import {ActivatedRoute} from '@angular/router';
@@ -31,7 +32,8 @@ export class ReserveConsultationComponent implements OnInit {
   selectedDay: string | null = null;   // 'YYYY-MM-DD'
   selectedTime: string | null = null;  // 'HH:mm'
 
-  constructor(private calendarService: CalendarService) {
+  constructor(private calendarService: CalendarService,
+              private cartService: CartService ) {
     this.reserveForm = new FormGroup({
       day: new FormControl('', Validators.required),       // data w formacie 'YYYY-MM-DD'
       time: new FormControl('', Validators.required),      // godzina startu np. '08:00'
@@ -52,47 +54,40 @@ export class ReserveConsultationComponent implements OnInit {
         time: this.selectedTime
       });
     }
+
   }
 
   onSubmit(): void {
     if (this.reserveForm.invalid) {
       return;
     }
+
+    // 1) Pobierz wartości z formularza
     const formVal = this.reserveForm.value;
+    // zakładamy, że mamy np. formControlName="day", "time", "slotsCount", "type", etc.
 
-    // 1. Parsujemy datę + startTime
-    const dayMoment = moment(formVal.day, 'YYYY-MM-DD');
-    const timeParts = formVal.time.split(':'); // ["HH","mm"]
-    const start = moment(dayMoment).hour(+timeParts[0]).minute(+timeParts[1]);
+    // 2) Parsuj je na momenty (zakładamy, że instalowałeś moment.js)
+    const dayMoment = moment(formVal.day, 'YYYY-MM-DD'); // data w formacie YYYY-MM-DD
+    const [hour, minute] = formVal.time.split(':');      // np. "08:00" => ["08","00"]
+    const start = moment(dayMoment).hour(+hour).minute(+minute);
 
-    // 2. Obliczamy endTime = start + (slotsCount * 30 min)
+    // Załóżmy, że w formularzu mamy `slotsCount` = liczba slotów 30-minutowych
     const end = moment(start).add(formVal.slotsCount * 30, 'minutes');
 
-    // 3. Sprawdzamy, czy slot jest wolny (brak konfliktu, brak absencji)
-    const conflict = this.calendarService.checkConflict(dayMoment, start, end);
-    if (conflict) {
-      alert('Wybrany przedział czasowy jest już zajęty lub koliduje z inną wizytą!');
-      return;
-    }
-
-    // 4. Tworzymy Appointment
+    // 3) Stwórz obiekt rezerwacji
     const newAppt: Appointment = {
-      id: 0, // nadamy ID w serwisie
-      startTime: start.toISOString(), // np. '2025-01-05T08:00:00'
+      id: 0,
+      startTime: start.toISOString(),
       endTime: end.toISOString(),
       type: formVal.type,
       patientName: formVal.patientName,
-      status: 'CONFIRMED', // nowa rezerwacja
-      // (opcjonalnie)
-      // patientGender, patientAge, notes itp. można dodać do Appointment
+      status: 'IN_CART'
     };
 
-    // 5. Dodajemy rezerwację w serwisie
-    this.calendarService.addAppointment(dayMoment, newAppt);
+    // 4) Dodajemy do koszyka (jeśli taki jest zamysł Zadania 5)
+    this.cartService.addToCart(newAppt);
 
-    alert('Rezerwacja została zapisana.');
-    // Ewentualnie reset i nawigacja
-    this.reserveForm.reset();
+    alert('Konsultacja została dodana do koszyka!');
   }
 
 

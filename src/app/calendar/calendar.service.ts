@@ -12,7 +12,7 @@ export interface Appointment {
   endTime: string;     // '2025-01-05T08:30:00'
   type: string;        // np. 'pierwsza wizyta', 'kontrolna' itd.
   patientName: string; // np. 'Jan Kowalski'
-  status: 'CONFIRMED' | 'CANCELLED' | 'DONE' | 'PAST';
+  status: 'CONFIRMED' | 'CANCELLED' | 'DONE' | 'PAST' | 'IN_CART';
 }
 
 export interface DayAppointments {
@@ -49,7 +49,7 @@ export class CalendarService {
 
   public getAppointments(): Observable<DayAppointments[]> {
     // Uwaga: plik JSON w folderze "src/assets/appointments.json"
-    return this.http.get<DayAppointments[]>('assets/appointments.json');
+    return this.http.get<DayAppointments[]>('src/assets/appointments.json');
   }
 
   // Dodanie nowej dostępności

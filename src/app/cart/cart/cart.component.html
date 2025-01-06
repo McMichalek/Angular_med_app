@@ -1,0 +1,38 @@
+<div class="cart-container">
+  <h2>Koszyk rezerwacji</h2>
+
+  <div *ngIf="cartItems.length === 0 && !paymentSuccessful">
+    <p>Twój koszyk jest pusty.</p>
+  </div>
+
+  <div *ngIf="cartItems.length > 0">
+    <table class="cart-table">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Data i godzina</th>
+        <th>Typ</th>
+        <th>Pacjent</th>
+        <th>Akcje</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let ap of cartItems">
+        <td>{{ ap.id }}</td>
+        <td>{{ ap.startTime | date: 'yyyy-MM-dd HH:mm' }} - {{ ap.endTime | date: 'HH:mm' }}</td>
+        <td>{{ ap.type }}</td>
+        <td>{{ ap.patientName }}</td>
+        <td>
+          <button (click)="removeItem(ap.id)">Usuń z koszyka</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <button (click)="simulatePayment()">Opłać rezerwacje</button>
+  </div>
+
+  <div *ngIf="paymentSuccessful">
+    <p>Rezerwacje zostały pomyślnie opłacone!</p>
+  </div>
+</div>

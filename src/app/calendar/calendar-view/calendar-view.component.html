@@ -12,42 +12,54 @@
 
   <table class="calendar-table">
     <thead>
+    <!-- Nagłówki kolumn z dniami -->
     <tr>
-      <!-- Pusta komórka w nagłówku dla kolumny godzin -->
-      <th></th>
-      <!-- Nagłówki kolumn - 7 dni tygodnia -->
-      <th *ngFor="let day of displayedDays"
-          [class.today]="isToday(day)"
-          [class.absent]="isDayInAbsence(day)">
-        <div>{{ day.format('dddd') }}, {{ day.format('DD.MM') }}</div>
-        <div class="appointments-count">
-          <!-- Liczba rezerwacji zarejestrowanych na dany dzień -->
-          Rezerwacje: {{ getAppointmentsCountForDay(day) }}
-        </div>
+      <th></th> <!-- kolumna godzin -->
+      <th *ngFor="let day of displayedDays">
+        {{ day.format('dddd') }} ({{ day.format('DD.MM') }})
       </th>
     </tr>
     </thead>
+
     <tbody>
-    <!-- Wiersze: sloty co 30 min -->
+    <!-- Wiersze = sloty czasowe co 30 min -->
     <tr *ngFor="let slot of timeSlots">
-      <!-- Komórka z godziną (nagłówek wiersza) -->
+      <!-- Komórka z godziną -->
       <th class="time-label">{{ formatHour(slot) }}</th>
 
-      <!-- Kolumny dla 7 dni w tygodniu -->
-      <td *ngFor="let day of displayedDays">
-        <ng-container *ngIf="isSlotAvailable(day, slot); else notAvailable">
-          <!-- Rezerwacje -->
-          <ng-container *ngFor="let appt of getAppointmentsForSlot(day, slot)">
-            <div class="appointment-block"> {{ appt.type }} </div>
+      <!-- Komórki: poszczególne dni w tygodniu -->
+      <td *ngFor="let day of displayedDays"
+          [class.absent]="isDayInAbsence(day)">
+
+        <!-- 1) Jeśli ten dzień jest w absencji => wyświetl 'Absencja' -->
+        <ng-container *ngIf="!isDayInAbsence(day); else absentDay">
+
+          <!-- 2) Dzień nie jest w absencji => sprawdź rezerwacje w tym slocie -->
+          <ng-container *ngIf="getAppointmentsForSlot(day, slot).length > 0; else noAppointment">
+
+            <!-- 2a) Istnieje rezerwacja => wyświetl typ konsultacji -->
+            <ng-container *ngFor="let appt of getAppointmentsForSlot(day, slot)">
+              <div class="appointment-block">
+                {{ appt.type }}
+              </div>
+            </ng-container>
+
           </ng-container>
-          <!-- Jeśli brak rezerwacji => Wolny slot -->
-          <div *ngIf="getAppointmentsForSlot(day, slot).length === 0" class="slot-free"
-               (click)="reserveSlot(day, slot)">
-            Wolny
-          </div>
+          <!-- 2b) Brak rezerwacji => czy slot jest dostępny? -->
+          <ng-template #noAppointment>
+            <ng-container *ngIf="isSlotAvailable(day, slot); else notAvailable">
+              <div class="slot-free">Wolny</div>
+            </ng-container>
+            <!-- Domyślnie (jeśli nie 'isSlotAvailable') => Niedostępne -->
+            <ng-template #notAvailable>
+              <div class="slot-unavailable">Niedostępne</div>
+            </ng-template>
+          </ng-template>
+
         </ng-container>
-        <ng-template #notAvailable>
-          <div class="slot-unavailable">Niedostępne</div>
+        <!-- 1b) Szablon, gdy dzień jest w absencji -->
+        <ng-template #absentDay>
+          <div class="slot-absent">Absencja</div>
         </ng-template>
       </td>
     </tr>

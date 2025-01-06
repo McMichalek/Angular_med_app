@@ -4,6 +4,7 @@ import {CalendarViewComponent} from './calendar/calendar-view/calendar-view.comp
 import {DefineAvailabilityComponent} from './calendar/define-availability/define-availability.component';
 import {DefineAbsenceComponent} from './calendar/define-absence/define-absence.component';
 import {ReserveConsultationComponent} from './calendar/reserve-consultation/reserve-consultation.component';
+import {CartComponent} from './cart/cart/cart.component';
 
 export const routes: Routes = [
   {
@@ -19,6 +20,10 @@ export const routes: Routes = [
   },
   { path: 'reserve-consultation',
     component: ReserveConsultationComponent },
+  {
+    path: 'cart',
+    component: CartComponent
+  },
   {
     path: '**',
     redirectTo: ''
