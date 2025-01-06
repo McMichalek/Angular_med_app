@@ -84,6 +84,8 @@ export class ReserveConsultationComponent implements OnInit {
       status: 'IN_CART'
     };
 
+    this.calendarService.addAppointment(moment(newAppt.startTime), newAppt);
+
     // 4) Dodajemy do koszyka (jeśli taki jest zamysł Zadania 5)
     this.cartService.addToCart(newAppt);
 
